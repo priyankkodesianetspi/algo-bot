@@ -39,24 +39,9 @@ def get_access_token():
 
 def save_to_csv(df, instrument_key):
     instrument_name = instrument_key.split('|')[1]
-    df = clean_and_normalize_data(df)
     file_path = f"{instrument_name}.csv"
     df.to_csv(file_path, index=False)
     return file_path
-
-
-def clean_and_normalize_data(df):
-    df = df.dropna()
-    # ohlc_columns = ['Open', 'High', 'Low', 'Close', 'Volume']
-    # ohlc_data = df[ohlc_columns]
-    # indicators_data = df.drop(columns=ohlc_columns)
-    #
-    # scaler = MinMaxScaler()
-    # scaled_indicators = scaler.fit_transform(indicators_data)
-    # scaled_indicators_df = pd.DataFrame(scaled_indicators, columns=indicators_data.columns, index=indicators_data.index)
-    #
-    # df = pd.concat([ohlc_data, scaled_indicators_df], axis=1)
-    return df
 
 
 def load_data(file_path):

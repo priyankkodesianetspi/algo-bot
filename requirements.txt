@@ -61,6 +61,7 @@ opt-einsum==3.3.0
 optree==0.11.0
 orjson==3.10.4
 packaging==24.1
+pandas==2.2.2
 parsel==1.9.1
 prompt_toolkit==3.0.47
 Protego==0.3.1
@@ -78,6 +79,7 @@ pyperclip==1.9.0
 python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
 python-Levenshtein==0.25.1
+pytz==2024.1
 queuelib==1.7.0
 rapidfuzz==3.9.3
 redis==5.0.7
@@ -90,6 +92,8 @@ service-identity==24.1.0
 six==1.16.0
 sniffio==1.3.1
 SQLAlchemy==2.0.31
+ta==0.11.0
+TA-Lib==0.4.32
 tensorboard==2.16.2
 tensorboard-data-server==0.7.2
 tensorflow==2.16.2
