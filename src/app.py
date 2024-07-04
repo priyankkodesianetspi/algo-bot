@@ -13,7 +13,7 @@ from kiteconnect import KiteConnect
 # from pyotp import TOTP
 # import urllib.parse
 # import schedule
-from src.utils.util import isTradeTimeAllowed, getTotalPNL, get_access_token
+from utils.util import isTradeTimeAllowed, getTotalPNL, get_access_token
 
 load_dotenv()
 
