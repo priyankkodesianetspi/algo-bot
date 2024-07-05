@@ -1,5 +1,5 @@
 from flask import Flask
-from src.routes import init_routes
+from routes import init_routes
 from src.logger_config import setup_logging
 
 # Setup logging
