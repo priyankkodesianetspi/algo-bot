@@ -81,10 +81,10 @@ def webhook():
     print('received', data[0])
     if kite is None:
         generateKiteSession(get_access_token())
-    if isTradeTimeAllowed() == False:
-        return "invalid time"
-    if getTotalPNL(kite.positions()) >= allowed_pnl:
-        return "PNL exceeded"
+    # if isTradeTimeAllowed() == False:
+    #     return "invalid time"
+    # if getTotalPNL(kite.positions()) >= allowed_pnl:
+    #     return "PNL exceeded"
     placeOrder(data[0])
     return "success"
 
