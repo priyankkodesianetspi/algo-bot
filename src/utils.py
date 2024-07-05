@@ -1,56 +1,37 @@
-import datetime
-
 import pandas as pd
-import pytz
-allowed_pnl = 1000
-trade_start_time_h = 9
-trade_start_time_m = 15
-trade_end_time_h = 11
-trade_end_time_m = 30
-
-def isTradeTimeAllowed():
-    # set the timezone to IST
-    tz = pytz.timezone('Asia/Kolkata')
-
-    # get the current time in IST timezone
-    now = datetime.datetime.now(tz)
-    print(now.time())
-    # set the start and end times
-    start_time = datetime.time(trade_start_time_h, trade_start_time_m, 0)
-    end_time = datetime.time(trade_end_time_h, trade_end_time_m, 0)
-
-    # check if the current time is between the start and end times
-    if start_time <= now.time() <= end_time:
-        return True
-    else:
-        return False
 
 
-def getTotalPNL(positions):
-    total_pnl = 0
-    for position in positions:
-        pnl = (position.sell_value - position.buy_value) + (
-                    position.quantity * position.last_price * position.multiplier)
-        total_pnl += pnl
-    return total_pnl
+def load_env_vars():
+    from dotenv import load_dotenv
+    load_dotenv()
 
 
-def get_access_token():
-    with open('access_token.txt', 'r') as token_file:
-        return token_file.read()
+def write_order_data_to_file(key, orders):
+    df = pd.read_csv('trades.csv')
+    new_rows = [{
+        'id': key,
+        'order_id': order['order_id'],
+        'trading_symbol': order['tradingsymbol'],
+        'transaction_type': order['transaction_type'],
+        'order_timestamp': order['order_timestamp'],
+        'quantity': order['quantity'],
+        'status': order['status'],
+        'order_type': order['order_type']
+    } for order in orders]
+    df = pd.concat([df, pd.DataFrame(new_rows)], ignore_index=True)
+    df.to_csv('trades.csv', index=False, header=True)
 
 
-def save_to_csv(df, instrument_key):
-    instrument_name = instrument_key.split('|')[1]
-    file_path = f"{instrument_name}.csv"
-    df.to_csv(file_path, index=False)
-    return file_path
+def get_total_pnl(positions):
+    try:
+        return sum(pos['pnl'] for pos in positions)
+    except Exception:
+        return 0
 
 
-def load_data(file_path):
-    df = pd.read_csv(file_path)
-    df['Close'] = df['Close'].astype(float)
-    return df
+def is_trade_time_allowed():
+    # Implement logic to check if the current time is within allowed trading hours
+    return True
 
 # autologin()
 # access_token = open("access_token.txt", 'r').read()
