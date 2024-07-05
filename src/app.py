@@ -8,7 +8,7 @@ import pandas as pd
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify
 from kiteconnect import KiteConnect
-
+import logging as logger
 # from selenium import webdriver
 # from pyotp import TOTP
 # import urllib.parse
@@ -25,8 +25,9 @@ PORT = 8000
 HOST = "127.0.0.1"
 kite_api_secret = os.getenv("KITE_API_SECRET", "04xnxa3qehzacdggw3evgbhxkk8dse5b")
 kite_api_key = os.getenv("KITE_API_KEY", "ye8rerpg2zxmibju")
-login_url = os.getenv("LOGIN_URL")
 PASSPHRASE = os.getenv("PASSPHRASE")
+login_url = f"https://kite.zerodha.com/connect/login?v=3&api_key=ye8rerpg2zxmibju"
+console_url = f"https://developers.kite.trade/apps/ye8rerpg2zxmibju"
 
 allowed_pnl = 1000
 trade_start_time_h = 9
@@ -41,14 +42,14 @@ df = pd.DataFrame(columns=cols)
 df.to_csv('trades.csv', index=False, header=True)
 
 # Create a redirect url
-redirect_url = f"http://{HOST}:{PORT}/login"
+redirect_url = "https://13.201.92.141/login"
 
 # Templates
 index_template = f"""<a href="/index"><h1>Index</h1></a> <a href={login_url}><h1>Login</h1>"""
 login_template = f"<a href={login_url}><h1>Login</h1></a>"
 
 
-@app.route("/index")
+@app.route("/")
 def index():
     return index_template.format(login_url=login_url, )
 
@@ -76,6 +77,7 @@ def webhook():
     data = json.loads(request.data)
     # if (data['passphrase'] != PASSPHRASE):
     #   return "Invalid Passphrase"
+    logger.info(f"Received data: {data}")
     print('received', data[0])
     if kite is None:
         generateKiteSession(get_access_token())
