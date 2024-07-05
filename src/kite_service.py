@@ -1,8 +1,8 @@
 import logging
 import os
 from kiteconnect import KiteConnect
-from src.config import KITE_API_KEY, KITE_API_SECRET
-from src.utils import write_order_data_to_file
+from config import KITE_API_KEY, KITE_API_SECRET
+from utils import write_order_data_to_file
 
 logger = logging.getLogger(__name__)
 

@@ -3,9 +3,9 @@ import logging as logger
 
 from flask import request, jsonify
 
-from src.kite_service import KiteService
-from src.config import PASSPHRASE, MAX_LOSS
-from src.utils import load_env_vars, get_total_pnl
+from kite_service import KiteService
+from config import PASSPHRASE, MAX_LOSS
+from utils import load_env_vars, get_total_pnl
 
 kite_service = KiteService()
 
