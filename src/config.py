@@ -11,3 +11,5 @@ LOGIN_URL = f"https://kite.zerodha.com/connect/login?v=3&api_key=ye8rerpg2zxmibj
 REDIRECT_URL = "https://13.201.92.141/login"
 # REDIRECT_URL="http://127.0.0.1:8000/login"
 MAX_LOSS = os.getenv("MAX_LOSS", 1000)
+ORDER_TYPE = "MARKET"
+PRODUCT_TYPE = "MIS"

@@ -1,8 +1,8 @@
 import logging
 import os
 from kiteconnect import KiteConnect
-from config import KITE_API_KEY, KITE_API_SECRET
-from utils import write_order_data_to_file
+from config import KITE_API_KEY, KITE_API_SECRET, PRODUCT_TYPE, ORDER_TYPE
+from utils import write_order_data_to_file, write_missed_order_data_to_file
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ def _calculate_stop_loss_price(price):
 
 def _get_quantity(balance, price):
     try:
-        return min(1000, int(balance / price)) if balance >= price else 0
+        return min(1000, (int(balance / price) - 1)) if balance >= price else 0
     except Exception as e:
         logger.error(f"Error calculating quantity: {e}")
         return 0
@@ -94,7 +94,7 @@ class KiteService:
                 return self.kite.place_order(tradingsymbol=symbol, exchange=self.kite.EXCHANGE_NSE,
                                              transaction_type=transaction_type, quantity=quantity,
                                              variety=self.kite.VARIETY_REGULAR,
-                                             order_type=self.kite.ORDER_TYPE_MARKET, product=self.kite.PRODUCT_MIS,
+                                             order_type=self.kite.ORDER_TYPE_MARKET, product=PRODUCT_TYPE,
                                              validity=self.kite.VALIDITY_DAY)
         except Exception as e:
             logger.error(f"Error creating primary order: {e}")
@@ -104,7 +104,7 @@ class KiteService:
             return self.kite.place_order(tradingsymbol=symbol, exchange=self.kite.EXCHANGE_NSE,
                                          transaction_type=transaction_type, quantity=quantity, price=price,
                                          variety=self.kite.VARIETY_REGULAR,
-                                         order_type=order_type, product=self.kite.PRODUCT_MIS,
+                                         order_type=order_type, product=PRODUCT_TYPE,
                                          validity=self.kite.VALIDITY_DAY)
         except Exception as e:
             logger.error(f"Error creating limit order: {e}")
@@ -114,7 +114,7 @@ class KiteService:
             return self.kite.place_order(tradingsymbol=symbol, exchange=self.kite.EXCHANGE_NSE,
                                          transaction_type=transaction_type, quantity=quantity, trigger_price=price,
                                          variety=self.kite.VARIETY_REGULAR,
-                                         order_type=order_type, product=self.kite.PRODUCT_MIS,
+                                         order_type=order_type, product=PRODUCT_TYPE,
                                          validity=self.kite.VALIDITY_DAY)
         except Exception as e:
             logger.error(f"Error creating stop-loss order: {e}")
@@ -127,17 +127,17 @@ class KiteService:
         if not symbol:
             raise Exception("Symbol not provided")
 
+        total_cash = self.kite.margins()['equity']['available']['cash']
+        # stock_ltp = self._get_stock_ltp(symbol)
+        price = float(data['PRICE']) if data['PRICE'] else self._get_stock_ltp(symbol)
+        target_price = _calculate_target_price(price)
+        stop_loss_price = _calculate_stop_loss_price(price)
         try:
-            total_cash = self.kite.margins()['equity']['available']['cash']
-            stock_ltp = self._get_stock_ltp(symbol)
-            quantity = _get_quantity(total_cash, stock_ltp)
-
-            price = stock_ltp
-            target_price = _calculate_target_price(price)
-            stop_loss_price = _calculate_stop_loss_price(price)
-
+            quantity = _get_quantity(total_cash, price)
+            if quantity < 1:
+                raise Exception("Quantity cannot be 0")
             primary_transaction_type = 'SELL' if data['TT'] == 'SELL' else 'BUY'
-            primary_order_type = 'LIMIT' if data['OT'] == 'LIMIT' else 'MARKET'
+            primary_order_type = ORDER_TYPE
 
             target_transaction_type = 'BUY' if primary_transaction_type == 'SELL' else 'SELL'
             target_order_type = 'LIMIT'
@@ -163,6 +163,7 @@ class KiteService:
             logger.info(f"Order placed successfully: {primary_order_id}, {target_order_id}, {sl_order_id}")
         except Exception as e:
             logger.error(f"Error placing order: {e}")
+            write_missed_order_data_to_file(data, price, target_price, stop_loss_price)
 
     def _get_stock_ltp(self, symbol):
         try:

@@ -1,1 +1,1 @@
-order_id,tradingsymbol,transaction_type,order_timestamp,quantity,status
+id, order_id,trading_symbol,transaction_type,order_timestamp,quantity,status, order_type

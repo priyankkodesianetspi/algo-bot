@@ -1,3 +1,5 @@
+import time
+
 import pandas as pd
 
 
@@ -20,6 +22,20 @@ def write_order_data_to_file(key, orders):
     } for order in orders]
     df = pd.concat([df, pd.DataFrame(new_rows)], ignore_index=True)
     df.to_csv('trades.csv', index=False, header=True)
+
+
+def write_missed_order_data_to_file(data, price, stop_loss_price, target_price):
+    df = pd.read_csv('missed_trades.csv')
+    new_rows = [{
+        'trading_symbol': data['TS'],
+        'transaction_type': data['TT'],
+        'order_timestamp': time.time(),
+        'price': price,
+        'stop_loss': stop_loss_price,
+        'target_price': target_price,
+    }]
+    df = pd.concat([df, pd.DataFrame(new_rows)], ignore_index=True)
+    df.to_csv('missed_trades.csv', index=False, header=True)
 
 
 def get_total_pnl(positions):

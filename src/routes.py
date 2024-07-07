@@ -29,17 +29,17 @@ def init_routes(app):
             orderdata.append(kite_service.kite.order_history(order_id=i))
         return jsonify(orderdata)
 
-    # {"TT":"BUY","TS":"SBIN", "OT":"MARKET", "passphrase": "..."}
+    # {"TT":"BUY","TS":"SBIN", "PRICE": 123}
     @app.route("/webhook", methods=["POST"])
     def webhook():
         data = request.get_json()
-        if data['passphrase'] != PASSPHRASE:
-            return "Invalid Passphrase"
+        # if data['passphrase'] != PASSPHRASE:
+        #     return "Invalid Passphrase"
         logger.info(f"Received data: {data}")
 
         kite = kite_service.kite
-        if get_total_pnl(kite.positions()) >= int(MAX_LOSS):
-            return "PNL exceeded"
+        # if get_total_pnl(kite.positions()) >= int(MAX_LOSS):
+        #     return "PNL exceeded"
 
         kite_service.place_order(data)
         return "success"
