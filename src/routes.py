@@ -3,11 +3,12 @@ import logging as logger
 
 from flask import request, jsonify
 
+from config import LOGIN_URL
 from kite_service import KiteService
-from config import PASSPHRASE, MAX_LOSS
-from utils import load_env_vars, get_total_pnl
+from utils import load_env_vars
 
 kite_service = KiteService()
+index_template = f"""<a href={LOGIN_URL}><h1>Login</h1>"""
 
 
 def init_routes(app):
@@ -15,7 +16,7 @@ def init_routes(app):
 
     @app.route("/")
     def index():
-        return "<a href='/login'><h1>Login</h1></a>"
+        return index_template
 
     @app.route("/trades")
     def get_trades():
