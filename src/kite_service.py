@@ -27,7 +27,7 @@ def _calculate_stop_loss_price(price):
 
 def _get_quantity(balance, price):
     try:
-        return min(1000, (int(balance / price) - 1)) if balance >= price else 0
+        return (int(balance / price) - 1) if balance >= price else 0
     except Exception as e:
         logger.error(f"Error calculating quantity: {e}")
         return 0
