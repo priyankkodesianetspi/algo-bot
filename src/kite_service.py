@@ -142,7 +142,7 @@ class KiteService:
             quantity = _get_quantity(total_cash, price)
             if quantity < 1:
                 raise Exception("Quantity cannot be 0")
-            primary_transaction_type = 'SELL' if data['TT'] == 'SELL' else 'BUY'
+            primary_transaction_type = 'BUY' if data['TT'] == 'SELL' else 'SELL'
             primary_order_type = ORDER_TYPE
 
             target_transaction_type = 'BUY' if primary_transaction_type == 'SELL' else 'SELL'
