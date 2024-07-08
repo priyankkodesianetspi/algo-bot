@@ -7,7 +7,7 @@ from utils import write_order_data_to_file, write_missed_order_data_to_file
 logger = logging.getLogger(__name__)
 
 
-def calculate_target_price(price):
+def _calculate_target_price(price):
     """
     Calculate the target price by increasing the current price by a specified percentage and rounding to the nearest 0.05.
     :param price: Current price
@@ -18,7 +18,8 @@ def calculate_target_price(price):
     target_price = round(increased_price / 0.05) * 0.05
     return target_price
 
-def calculate_stop_loss_price(price):
+
+def _calculate_stop_loss_price(price):
     """
     Calculate the stop loss price by decreasing the current price by a specified percentage and rounding to the nearest 0.05.
     :param price: Current price
