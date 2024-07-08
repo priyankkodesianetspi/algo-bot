@@ -1,28 +1,33 @@
 import logging
 import os
 from kiteconnect import KiteConnect
-from config import KITE_API_KEY, KITE_API_SECRET, PRODUCT_TYPE, ORDER_TYPE
+from config import KITE_API_KEY, KITE_API_SECRET, PRODUCT_TYPE, ORDER_TYPE, SLP, TP
 from utils import write_order_data_to_file, write_missed_order_data_to_file
 
 logger = logging.getLogger(__name__)
 
 
-def _calculate_target_price(price):
-    try:
-        target_price = round((price * 1.0020) * 20) / 20
-        logger.info(f"Calculated target price: {target_price}")
-        return target_price
-    except Exception as e:
-        logger.error(f"Error calculating target price: {e}")
+def calculate_target_price(price):
+    """
+    Calculate the target price by increasing the current price by a specified percentage and rounding to the nearest 0.05.
+    :param price: Current price
+    :param increment_percentage: Percentage to increase the price
+    :return: Target price rounded to the nearest 0.05
+    """
+    increased_price = price * (1 + TP / 100)
+    target_price = round(increased_price / 0.05) * 0.05
+    return target_price
 
-
-def _calculate_stop_loss_price(price):
-    try:
-        stop_loss_price = round(((price * 0.99) * 1.0020) * 20) / 20
-        logger.info(f"Calculated stop-loss price: {stop_loss_price}")
-        return stop_loss_price
-    except Exception as e:
-        logger.error(f"Error calculating stop-loss price: {e}")
+def calculate_stop_loss_price(price):
+    """
+    Calculate the stop loss price by decreasing the current price by a specified percentage and rounding to the nearest 0.05.
+    :param price: Current price
+    :param decrement_percentage: Percentage to decrease the price
+    :return: Stop loss price rounded to the nearest 0.05
+    """
+    decreased_price = price * (1 - SLP / 100)
+    stop_loss_price = round(decreased_price / 0.05) * 0.05
+    return stop_loss_price
 
 
 def _get_quantity(balance, price):
