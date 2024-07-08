@@ -126,8 +126,8 @@ class KiteService:
         symbol = data.get('TS')
         if not symbol:
             raise Exception("Symbol not provided")
-
-        total_cash = self.kite.margins()['equity']['available']['cash']
+        logger.info(f"Margins {self.kite.margins()}")
+        total_cash = self.kite.margins()['equity']['available']['live_balance']
         # stock_ltp = self._get_stock_ltp(symbol)
         price = float(data['PRICE']) if data['PRICE'] else self._get_stock_ltp(symbol)
         target_price = _calculate_target_price(price)
