@@ -13,5 +13,5 @@ REDIRECT_URL = "https://13.201.92.141/login"
 MAX_LOSS = os.getenv("MAX_LOSS", 1000)
 ORDER_TYPE = "MARKET"
 PRODUCT_TYPE = "MIS"
-TP = 0.3
+TP = 0.25
 SLP = 0.6
