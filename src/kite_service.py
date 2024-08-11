@@ -1,10 +1,21 @@
 import logging
 import os
+from datetime import datetime, timedelta
+from time import strftime
+
+import pandas as pd
+from flask import Flask
 from kiteconnect import KiteConnect
-from config import KITE_API_KEY, KITE_API_SECRET, PRODUCT_TYPE, ORDER_TYPE, SLP, TP
-from utils import write_order_data_to_file, write_missed_order_data_to_file
+from src.config import KITE_API_KEY, KITE_API_SECRET, PRODUCT_TYPE, ORDER_TYPE, SLP, TP
+from src.data.nifty_list import nifty50_companies
+from src.indicators import get_indicators
+from src.utils.util import save_to_csv, write_order_data_to_file, write_missed_order_data_to_file
 
 logger = logging.getLogger(__name__)
+app = Flask(__name__)
+
+pd.set_option('display.max_rows', None)
+pd.set_option('display.max_columns', None)
 
 
 def _calculate_target_price(price):
@@ -176,3 +187,40 @@ class KiteService:
             return self.kite.quote(f'NSE:{symbol}')[f'NSE:{symbol}']['last_price']
         except Exception as e:
             logger.error(f"Error getting stock LTP: {e}")
+
+    def get_historical_data(self, interval: str = '15minute', delta: int = 21):
+        to_date = datetime.now().strftime('%Y-%m-%d')
+        from_date = (datetime.now() - timedelta(days=delta)).strftime('%Y-%m-%d')
+
+        nifty_list = nifty50_companies.keys()
+        for symbol in nifty_list:
+            try:
+                historical_data = self.kite.historical_data(self.kite.EXCHANGE_NSE, symbol, interval, from_date,
+                                                            to_date)
+                df = pd.DataFrame(historical_data.data.candles,
+                                  columns=['Timestamp', 'Open', 'High', 'Low', 'Close', 'Volume'])
+
+                response = get_indicators(df)
+                df = pd.read_json(response)
+                save_to_csv(df, symbol)
+                logger.info(f"Got historical data for {symbol}")
+            except Exception as e:
+                logger.error(f"Error getting historical data: {e}")
+                return None
+            break
+
+    @staticmethod
+    def dataframe_to_json(df):
+        """
+        Convert a pandas DataFrame to JSON format.
+
+        Parameters:
+        df (pd.DataFrame): The DataFrame to convert.
+
+        Returns:
+        str: JSON string representation of the DataFrame.
+        """
+        # Convert the DataFrame to JSON format
+        json_result = df.to_json(orient='records', date_format='iso')
+
+        return json_result

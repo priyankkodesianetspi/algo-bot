@@ -1,6 +1,8 @@
-import time
+import datetime
 
 import pandas as pd
+import pytz
+from src._config import *
 
 
 def load_env_vars():
@@ -9,7 +11,7 @@ def load_env_vars():
 
 
 def write_order_data_to_file(key, orders):
-    df = pd.read_csv('trades.csv')
+    df = pd.read_csv('../trades.csv')
     new_rows = [{
         'id': key,
         'order_id': order['order_id'],
@@ -25,11 +27,11 @@ def write_order_data_to_file(key, orders):
 
 
 def write_missed_order_data_to_file(data, price, stop_loss_price, target_price):
-    df = pd.read_csv('missed_trades.csv')
+    df = pd.read_csv('../missed_trades.csv')
     new_rows = [{
         'trading_symbol': data['TS'],
         'transaction_type': data['TT'],
-        'order_timestamp': time.time(),
+        'order_timestamp': datetime.time.time(),
         'price': price,
         'stop_loss': stop_loss_price,
         'target_price': target_price,
@@ -38,16 +40,64 @@ def write_missed_order_data_to_file(data, price, stop_loss_price, target_price):
     df.to_csv('missed_trades.csv', index=False, header=True)
 
 
-def get_total_pnl(positions):
-    try:
-        return sum(pos['pnl'] for pos in positions)
-    except Exception:
-        return 0
+def isTradeTimeAllowed():
+    # set the timezone to IST
+    tz = pytz.timezone('Asia/Kolkata')
+
+    # get the current time in IST timezone
+    now = datetime.datetime.now(tz)
+    print(now.time())
+    # set the start and end times
+    start_time = datetime.time(trade_start_time_h, trade_start_time_m, 0)
+    end_time = datetime.time(trade_end_time_h, trade_end_time_m, 0)
+
+    # check if the current time is between the start and end times
+    if start_time <= now.time() <= end_time:
+        return True
+    else:
+        return False
 
 
-def is_trade_time_allowed():
-    # Implement logic to check if the current time is within allowed trading hours
-    return True
+def getTotalPNL(positions):
+    total_pnl = 0
+    for position in positions:
+        pnl = (position.sell_value - position.buy_value) + (
+                    position.quantity * position.last_price * position.multiplier)
+        total_pnl += pnl
+    return total_pnl
+
+
+def get_access_token():
+    with open('access_token.txt', 'r') as token_file:
+        return token_file.read()
+
+
+def save_to_csv(df, instrument_key):
+    instrument_name = instrument_key.split('|')[1]
+    df = clean_and_normalize_data(df)
+    file_path = f"../data/{instrument_name}.csv"
+    df.to_csv(file_path, index=False)
+    return file_path
+
+
+def clean_and_normalize_data(df):
+    df = df.dropna()
+    # ohlc_columns = ['Open', 'High', 'Low', 'Close', 'Volume']
+    # ohlc_data = df[ohlc_columns]
+    # indicators_data = df.drop(columns=ohlc_columns)
+    #
+    # scaler = MinMaxScaler()
+    # scaled_indicators = scaler.fit_transform(indicators_data)
+    # scaled_indicators_df = pd.DataFrame(scaled_indicators, columns=indicators_data.columns, index=indicators_data.index)
+    #
+    # df = pd.concat([ohlc_data, scaled_indicators_df], axis=1)
+    return df
+
+
+def load_data(file_path):
+    df = pd.read_csv(file_path)
+    df['Close'] = df['Close'].astype(float)
+    return df
 
 # autologin()
 # access_token = open("access_token.txt", 'r').read()

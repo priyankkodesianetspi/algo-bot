@@ -5,7 +5,7 @@ from src.llm.models import agent_setup
 
 
 def process_chat(prompt):
-    chat = agent_setup(agent_model="gpt-3.5", agent_temp=1.0, agent_top_p=0.9, agent_max_tokens=512)
+    chat = agent_setup(agent_model="gpt-4o", agent_temp=1.0, agent_top_p=0.9, agent_max_tokens=10000)
 
     logger.info(f"Chat object type: {type(chat)}")
     logger.info(f"Chat object methods: {dir(chat)}")

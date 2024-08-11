@@ -1,10 +1,14 @@
 import functools
 import logging as logger
 import boto3
+from src.llm._types import Message, ModelParameters, Role, ChatFunction
 
 from mistralai.client import MistralClient
 from mistralai.models.chat_completion import ChatMessage
-
+from openai.lib.azure import AzureOpenAI
+from openai import AzureOpenAI
+from openai.types.chat import ChatCompletionMessageParam
+import requests
 from src.llm._types import Message, Parameters, Role, ChatFunction
 
 from openai import OpenAI
@@ -36,6 +40,52 @@ def chat_openai(messages: t.List[Message], parameters: Parameters) -> Message:
 
     # Return the response message
     return Message(role="assistant", content=response_message['content'])
+
+
+def chat_azure_openai(messages: t.List[Message], parameters: ModelParameters) -> Message:
+    client = AzureOpenAI(
+        api_key="3abf01e78cce428f9cee24af6d36f863",
+        azure_endpoint="https://jailbreaker.openai.azure.com/",
+        # azure_ad_token_provider=token_provider,
+        api_version="2024-02-01",
+    )
+
+    completion = client.chat.completions.create(
+        model=parameters.model,
+        messages=t.cast(t.List[ChatCompletionMessageParam], messages),
+        temperature=parameters.temperature,
+        max_tokens=parameters.max_tokens,
+        top_p=parameters.top_p,
+    )
+
+    response_message = completion.choices[0].message
+    return Message(
+        role=Role(response_message.role), content=str(response_message.content)
+    )
+
+
+# def chat_perplexity_ai(messages: t.List[Message], parameters: ModelParameters) -> Message:
+#     url = "https://api.perplexity.ai/chat/completions"
+#     payload = {
+#         "model": parameters.model,
+#         "messages": [{"role": message.role.value, "content": message.content} for message in messages],
+#         "max_tokens": parameters.max_tokens,
+#         "temperature": parameters.temperature,
+#         "top_p": parameters.top_p,
+#     }
+#     headers = {
+#         "accept": "application/json",
+#         "content-type": "application/json",
+#         "authorization": f"Bearer {os.getenv("PERPLEXITY_API_KEY")}"
+#     }
+#
+#     response = requests.post(url, json=payload, headers=headers)
+#
+#     response_message = response.json()['choices'][0]['message']
+#
+#     return Message(
+#         role=Role(response_message['role']), content=str(response_message['content'])
+#     )
 
 
 def chat_mistral(
@@ -166,6 +216,8 @@ Models: t.Dict[str, t.Tuple] = {
     # "mistral-large_": (chat_mistral, "mistral-large-latest"),
     # "mixtral-8x7b": (chat_mistral, "open-mixtral-8x7b"),
     # "mistral-7b": (chat_mistral, "open-mistral-7b"),
+    "gpt-4o": (chat_azure_openai, "jailbreaker"),
+    "gpt-35-turbo": (chat_azure_openai, "gpt-35-turbo"),
     "llama2-13b": (chat_bedrock, "meta.llama2-13b-v1"),
     "llama2-70b": (chat_bedrock, "meta.llama2-70b-v1"),
     "llama2-chat-13b": (chat_bedrock, "meta.llama2-13b-chat-v1"),

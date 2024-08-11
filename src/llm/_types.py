@@ -18,6 +18,12 @@ class Feedback(BaseModel):
     prompt: str
     improvement: str
 
+class ModelParameters(BaseModel):
+    model: str
+    temperature: float = 0.3
+    max_tokens: int = 2000
+    top_p: float = 0.9
+
 
 class TreeNode(BaseModel):
     children: t.List["TreeNode"]
