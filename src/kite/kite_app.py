@@ -8,7 +8,7 @@ import pandas as pd
 from flask import Flask, request, jsonify
 from kiteconnect import KiteConnect
 
-from src._config import *
+from src.config import *
 from src.kite_service import KiteService
 from src.utils.util import isTradeTimeAllowed, getTotalPNL
 
@@ -65,7 +65,7 @@ def login():
 
     client = KiteService()
     client.generate_kite_session(request_token)
-    return kite.profile()
+    return client.kite.profile()
 
 
 @app.route('/historical-data', methods=['POST'])

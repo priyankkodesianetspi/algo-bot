@@ -2,7 +2,7 @@ import datetime
 
 import pandas as pd
 import pytz
-from src._config import *
+from src.config import *
 
 
 def load_env_vars():
