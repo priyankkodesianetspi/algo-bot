@@ -15,8 +15,8 @@ app = Flask(__name__)
 
 def calculate_fibonacci_levels(df):
     """Calculate Fibonacci levels for the given dataframe."""
-    max_price = df['High'].max()
-    min_price = df['Low'].min()
+    max_price = df['high'].max()
+    min_price = df['low'].min()
     difference = max_price - min_price
 
     levels = {
@@ -36,15 +36,15 @@ def calculate_fibonacci_levels(df):
 
 # def get_indicators(df):
 #     # Trend EMA
-#     df['ema_200'] = ta.trend.ema_indicator(df['Close'], window=200)
-#     df['ema_9'] = ta.trend.ema_indicator(df['Close'], window=9)
-#     df['ema_21'] = ta.trend.ema_indicator(df['Close'], window=21)
-#     df['ema_55'] = ta.trend.ema_indicator(df['Close'], window=55)
-#     df['ema_100'] = ta.trend.ema_indicator(df['Close'], window=100)
+#     df['ema_200'] = ta.trend.ema_indicator(df['close'], window=200)
+#     df['ema_9'] = ta.trend.ema_indicator(df['close'], window=9)
+#     df['ema_21'] = ta.trend.ema_indicator(df['close'], window=21)
+#     df['ema_55'] = ta.trend.ema_indicator(df['close'], window=55)
+#     df['ema_100'] = ta.trend.ema_indicator(df['close'], window=100)
 #
 #     # Supertrend
-#     atr_10 = ta.volatility.average_true_range(df['High'], df['Low'], df['Close'], window=10)
-#     df['supertrend'] = df['Close'] - atr_10 * 3  # Simplified supertrend for demo
+#     atr_10 = ta.volatility.average_true_range(df['high'], df['low'], df['close'], window=10)
+#     df['supertrend'] = df['close'] - atr_10 * 3  # Simplified supertrend for demo
 #
 #     # HMA
 #     def hma(series, length):
@@ -55,12 +55,12 @@ def calculate_fibonacci_levels(df):
 #         hma = ta.trend.wma_indicator(2 * wmaf - wmas, window=sqrt_length)
 #         return hma
 #
-#     df['hma_100'] = hma(df['Close'], 100)
+#     df['hma_100'] = hma(df['close'], 100)
 #
 #     # Parabolic SAR
 #     def psar(df, af_step=0.02, af_max=0.2):
-#         High = df['High']
-#         low = df['Low']
+#         High = df['high']
+#         low = df['low']
 #         length = len(df)
 #         psar = np.zeros(length)
 #         bull = True
@@ -106,17 +106,17 @@ def calculate_fibonacci_levels(df):
 #     df['psar'] = psar(df)
 #
 #     # RSI
-#     df['rsi_14'] = ta.momentum.rsi(df['Close'], window=14)
+#     df['rsi_14'] = ta.momentum.rsi(df['close'], window=14)
 #
 #     # MACD
-#     macd = ta.trend.MACD(df['Close'], window_slow=26, window_fast=12, window_sign=9)
+#     macd = ta.trend.MACD(df['close'], window_slow=26, window_fast=12, window_sign=9)
 #     df['macd'] = macd.macd()
 #     df['macd_signal'] = macd.macd_signal()
 #     df['macd_hist'] = macd.macd_diff()
 #
 #     # Wave Trend
 #     n1, n2 = 9, 12
-#     df['hlc3'] = (df['High'] + df['Low'] + df['Close']) / 3
+#     df['hlc3'] = (df['high'] + df['low'] + df['close']) / 3
 #     df['esa'] = ta.trend.ema_indicator(df['hlc3'], window=n1)
 #     df['d'] = ta.trend.ema_indicator(abs(df['hlc3'] - df['esa']), window=n1)
 #     df['ci'] = (df['hlc3'] - df['esa']) / (0.015 * df['d'])
@@ -125,34 +125,34 @@ def calculate_fibonacci_levels(df):
 #     df['wt2'] = ta.trend.sma_indicator(df['wt1'], window=4)
 #
 #     # Stochastic
-#     stoch = ta.momentum.StochasticOscillator(df['High'], df['Low'], df['Close'], window=14, smooth_window=3)
+#     stoch = ta.momentum.StochasticOscillator(df['high'], df['low'], df['close'], window=14, smooth_window=3)
 #     df['k'] = stoch.stoch()
 #     df['d'] = stoch.stoch_signal()
 #
 #     # Bollinger Bands
-#     bb = ta.volatility.BollingerBands(df['Close'], window=20, window_dev=2)
+#     bb = ta.volatility.BollingerBands(df['close'], window=20, window_dev=2)
 #     df['bb_upper'] = bb.bollinger_hband()
 #     df['bb_middle'] = bb.bollinger_mavg()
 #     df['bb_lower'] = bb.bollinger_lband()
 #
 #     # ATR-based stop levels
-#     df['atr_1'] = ta.volatility.average_true_range(df['High'], df['Low'], df['Close'], window=1)
-#     df['long_stop'] = df['High'].rolling(window=1).max() - df['atr_1'] * 1.85
-#     df['short_stop'] = df['Low'].rolling(window=1).min() + df['atr_1'] * 1.85
+#     df['atr_1'] = ta.volatility.average_true_range(df['high'], df['low'], df['close'], window=1)
+#     df['long_stop'] = df['high'].rolling(window=1).max() - df['atr_1'] * 1.85
+#     df['short_stop'] = df['low'].rolling(window=1).min() + df['atr_1'] * 1.85
 #
 #     # Relative Volatility Index
-#     df['stddev'] = df['Close'].rolling(window=12).std()
-#     df['upper_rvi'] = ta.trend.ema_indicator(pd.Series(np.where(df['Close'].diff() <= 0, 0, df['stddev'])), window=14)
-#     df['lower_rvi'] = ta.trend.ema_indicator(pd.Series(np.where(df['Close'].diff() > 0, 0, df['stddev'])), window=14)
+#     df['stddev'] = df['close'].rolling(window=12).std()
+#     df['upper_rvi'] = ta.trend.ema_indicator(pd.Series(np.where(df['close'].diff() <= 0, 0, df['stddev'])), window=14)
+#     df['lower_rvi'] = ta.trend.ema_indicator(pd.Series(np.where(df['close'].diff() > 0, 0, df['stddev'])), window=14)
 #     df['rvi'] = df['upper_rvi'] / (df['upper_rvi'] + df['lower_rvi']) * 100
 #
 #     # OBV
-#     df['obv'] = ta.volume.on_balance_volume(df['Close'], df['Volume'])
+#     df['obv'] = ta.volume.on_balance_volume(df['close'], df['volume'])
 #
 #     # Chaikin Money Flow
-#     df['mf_mult'] = ((df['Close'] - df['Low']) - (df['High'] - df['Close'])) / (df['High'] - df['Low'])
-#     df['mf_vol'] = df['mf_mult'] * df['Volume']
-#     df['cmf'] = df['mf_vol'].rolling(window=50).sum() / df['Volume'].rolling(window=50).sum()
+#     df['mf_mult'] = ((df['close'] - df['low']) - (df['high'] - df['close'])) / (df['high'] - df['low'])
+#     df['mf_vol'] = df['mf_mult'] * df['volume']
+#     df['cmf'] = df['mf_vol'].rolling(window=50).sum() / df['volume'].rolling(window=50).sum()
 #
 #     return df
 
@@ -162,63 +162,63 @@ def get_indicators(df):
         raise ValueError("Data length must be at least 20 for the indicator calculations.")
 
     # Calculate ATR with window size 14 for demonstration purposes
-    atr = AverageTrueRange(high=df['High'], low=df['Low'], close=df['Close'], window=14)
+    atr = AverageTrueRange(high=df['high'], low=df['low'], close=df['close'], window=14)
     df['atr'] = atr.average_true_range()
 
     # Calculate RSI with window size 14 for demonstration purposes
-    rsi = RSIIndicator(close=df['Close'], window=14)
+    rsi = RSIIndicator(close=df['close'], window=14)
     df['rsi'] = rsi.rsi()
 
     # Calculate SMA with window size 20 for demonstration purposes
-    sma = SMAIndicator(close=df['Close'], window=20)
+    sma = SMAIndicator(close=df['close'], window=20)
     df['sma'] = sma.sma_indicator()
 
     # Calculate EMA with window size 20 for demonstration purposes
-    ema_20 = EMAIndicator(close=df['Close'], window=20)
+    ema_20 = EMAIndicator(close=df['close'], window=20)
     df['ema_20'] = ema_20.ema_indicator()
 
     # Calculate EMA with window size 9 for demonstration purposes
-    ema_9 = EMAIndicator(close=df['Close'], window=9)
+    ema_9 = EMAIndicator(close=df['close'], window=9)
     df['ema_9'] = ema_9.ema_indicator()
 
     # Calculate Bollinger Bands with window size 20 for demonstration purposes
-    bb = BollingerBands(close=df['Close'], window=20, window_dev=2)
+    bb = BollingerBands(close=df['close'], window=20, window_dev=2)
     df['bb_h'] = bb.bollinger_hband()
     df['bb_l'] = bb.bollinger_lband()
 
     # Calculate VWAP without window size
-    vwap = VolumeWeightedAveragePrice(high=df['High'], low=df['Low'], close=df['Close'], volume=df['Volume'])
+    vwap = VolumeWeightedAveragePrice(high=df['high'], low=df['low'], close=df['close'], volume=df['volume'])
     df['vwap'] = vwap.volume_weighted_average_price()
 
     # Calculate OBV
-    obv = OnBalanceVolumeIndicator(close=df['Close'], volume=df['Volume'])
+    obv = OnBalanceVolumeIndicator(close=df['close'], volume=df['volume'])
     df['obv'] = obv.on_balance_volume()
 
     # Calculate A/D line
-    ad_line = AccDistIndexIndicator(high=df['High'], low=df['Low'], close=df['Close'], volume=df['Volume'])
+    ad_line = AccDistIndexIndicator(high=df['high'], low=df['low'], close=df['close'], volume=df['volume'])
     df['ad_line'] = ad_line.acc_dist_index()
 
     # Calculate Average Directional Index (ADX)
-    adx = ADXIndicator(high=df['High'], low=df['Low'], close=df['Close'], window=11)
+    adx = ADXIndicator(high=df['high'], low=df['low'], close=df['close'], window=11)
     df['adx'] = adx.adx()
 
     # Calculate Aroon Oscillator
-    aroon = AroonIndicator(high=df['High'], low=df['Low'], window=25)
+    aroon = AroonIndicator(high=df['high'], low=df['low'], window=25)
     df['aroon'] = aroon.aroon_indicator()
 
     # Calculate MACD
-    macd = MACD(close=df['Close'])
+    macd = MACD(close=df['close'])
     df['macd'] = macd.macd()
     df['macd_diff'] = macd.macd_diff()
     df['macd_signal'] = macd.macd_signal()
 
     # # Calculate Stochastic Oscillator
-    # stoch = StochasticOscillator(high=df['High'], low=df['Low'], close=df['Close'], window=14)
+    # stoch = StochasticOscillator(high=df['high'], low=df['low'], close=df['close'], window=14)
     # df['stoch'] = stoch.stoch()
     # df['stoch_signal'] = stoch.stoch_signal()
 
     # Calculate Ichimoku Cloud
-    # ichimoku = IchimokuIndicator(high=df['High'], low=df['Low'], window1=9, window2=26, window3=52)
+    # ichimoku = IchimokuIndicator(high=df['high'], low=df['low'], window1=9, window2=26, window3=52)
     # df['ichimoku_a'] = ichimoku.ichimoku_a()
     # df['ichimoku_b'] = ichimoku.ichimoku_b()
     # df['ichimoku_base_line'] = ichimoku.ichimoku_base_line()

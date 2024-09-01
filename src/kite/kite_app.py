@@ -1,16 +1,11 @@
 import csv
-import json
-import math
-import os
 from pprint import pprint
 from logzero import logger
 import pandas as pd
 from flask import Flask, request, jsonify
-from kiteconnect import KiteConnect
 
 from src.config import *
-from src.kite_service import KiteService
-from src.utils.util import isTradeTimeAllowed, getTotalPNL
+from src.kite.kite_service import KiteService
 
 # App
 app = Flask(__name__)
@@ -18,7 +13,7 @@ app = Flask(__name__)
 # Base settings
 PORT = 8000
 HOST = "0.0.0.0"
-kite_api_secret = "04xnxa3qehzacdggw3evgbhxkk8dse5b"
+kite_api_secret = "g75rgyq5naf4tkj8lkv5w1i3s9pk70pn"
 kite_api_key = "ye8rerpg2zxmibju"
 PASSPHRASE = "MayburN!@#1810"
 
@@ -31,7 +26,7 @@ df.to_csv('trades.csv', index=False, header=True)
 # Create a redirect url
 LOGIN_URL = f"https://kite.zerodha.com/connect/login?v=3&api_key=ye8rerpg2zxmibju"
 # REDIRECT_URL = "https://13.201.92.141/login"
-REDIRECT_URL="https://127.0.0.1:8000/login"
+REDIRECT_URL = "https://127.0.0.1:8000/login"
 
 # Templates
 index_template = f"""<a href={LOGIN_URL}><h1>Login</h1>"""
@@ -59,7 +54,7 @@ def login():
         return """
             <span style="color: red">Error while generating request token.</span><a href='/'>
             Try again.<a>"""
-    token_file = os.path.join(os.getcwd(), '../access_token.txt')
+    token_file = os.path.join(os.getcwd(), 'access_token.txt')
     with open(token_file, 'w+') as f:
         f.write(request_token)
 

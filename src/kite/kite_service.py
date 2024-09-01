@@ -1,13 +1,14 @@
+import json
 import logging
 import os
 from datetime import datetime, timedelta
-from time import strftime
 
 import pandas as pd
 from flask import Flask
 from kiteconnect import KiteConnect
+
 from src.config import KITE_API_KEY, KITE_API_SECRET, PRODUCT_TYPE, ORDER_TYPE, SLP, TP
-from src.data.nifty_list import nifty50_companies
+from src.data.selected_nifty_companies import selected_companies
 from src.indicators import get_indicators
 from src.utils.util import save_to_csv, write_order_data_to_file, write_missed_order_data_to_file
 
@@ -48,7 +49,6 @@ def _get_quantity(balance, price):
     except Exception as e:
         logger.error(f"Error calculating quantity: {e}")
         return 0
-
 
 class KiteService:
     def __init__(self):
@@ -145,14 +145,14 @@ class KiteService:
             raise Exception("Symbol not provided")
         logger.info(f"Margins {self.kite.margins()}")
         total_cash = self.kite.margins()['equity']['available']['live_balance']
-        # stock_ltp = self._get_stock_ltp(symbol)
         price = float(data['PRICE']) if data['PRICE'] else self._get_stock_ltp(symbol)
         target_price = _calculate_target_price(price)
         stop_loss_price = _calculate_stop_loss_price(price)
         try:
-            quantity = _get_quantity(total_cash, price)
+            quantity = int(data['QTY']) if data.get('QTY') else _get_quantity(total_cash, price)
             if quantity < 1:
                 raise Exception("Quantity cannot be 0")
+
             primary_transaction_type = 'SELL' if data['TT'] == 'SELL' else 'SELL'
             primary_order_type = ORDER_TYPE
 
@@ -188,26 +188,76 @@ class KiteService:
         except Exception as e:
             logger.error(f"Error getting stock LTP: {e}")
 
-    def get_historical_data(self, interval: str = '15minute', delta: int = 21):
-        to_date = datetime.now().strftime('%Y-%m-%d')
-        from_date = (datetime.now() - timedelta(days=delta)).strftime('%Y-%m-%d')
+    def save_instruments_to_file(self):
+        """
+        Fetch instruments data from the Kite API and save it to a file named 'nifty_data.json'.
+        """
+        # Fetch the instruments data
+        instruments_data = self.kite.instruments(exchange=self.kite.EXCHANGE_NSE)
 
-        nifty_list = nifty50_companies.keys()
-        for symbol in nifty_list:
-            try:
-                historical_data = self.kite.historical_data(self.kite.EXCHANGE_NSE, symbol, interval, from_date,
-                                                            to_date)
-                df = pd.DataFrame(historical_data.data.candles,
-                                  columns=['Timestamp', 'Open', 'High', 'Low', 'Close', 'Volume'])
+        # Define the file name
+        file_name = 'nifty_data.json'
 
-                response = get_indicators(df)
-                df = pd.read_json(response)
-                save_to_csv(df, symbol)
-                logger.info(f"Got historical data for {symbol}")
-            except Exception as e:
-                logger.error(f"Error getting historical data: {e}")
-                return None
-            break
+        # Write the data to the file in JSON format
+        with open(file_name, 'w') as file:
+            json.dump(instruments_data, file, indent=4)
+
+        print(f"Data successfully written to {file_name}")
+
+    @staticmethod
+    def get_instruments():
+        file_name = 'nifty_data.json'
+        with open(file_name, 'r') as file:
+            data = json.load(file)
+            return data
+
+    # def get_historical_data(self, interval: str = '15minute', delta: int = 7):
+    #     # Get the current date and time
+    #     to_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    #
+    #     # Calculate the 'from_date' by subtracting the delta days and include time
+    #     from_date = (datetime.now() - timedelta(days=delta)).strftime('%Y-%m-%d %H:%M:%S')
+    #
+    #     nifty_list = [key for key in self.get_instruments() if key['tradingsymbol'] in selected_companies.keys()]
+    #     for symbol in nifty_list:
+    #         try:
+    #             historical_data = self.kite.historical_data(symbol['instrument_token'], from_date,
+    #                                                         to_date, interval)
+    #             df = pd.DataFrame(historical_data)
+    #
+    #             response = get_indicators(df)
+    #             response = response[50:]
+    #             save_to_csv(response, symbol['tradingsymbol'])
+    #             logger.info(f"Got historical data for {symbol['tradingsymbol']}")
+    #         except Exception as e:
+    #             logger.error(f"Error getting historical data: {e}")
+    #             return None
+    #         break
+
+    def get_historical_data_for_stock(self, ticker_symbol: str, interval: str = '15minute', delta: int = 7):
+        if not ticker_symbol:
+            raise Exception("Ticker symbol not provided")
+        # Get the current date and time
+        to_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+        # Calculate the 'from_date' by subtracting the delta days and include time
+        from_date = (datetime.now() - timedelta(days=delta)).strftime('%Y-%m-%d %H:%M:%S')
+
+        symbol = [_ for _ in self.get_instruments() if _['tradingsymbol'] == ticker_symbol][0]
+
+        try:
+            historical_data = self.kite.historical_data(symbol['instrument_token'], from_date,
+                                                        to_date, interval)
+            df = pd.DataFrame(historical_data)
+
+            response = get_indicators(df)
+            response = response.iloc[-50:]
+            result = self.dataframe_to_json(response)
+            logger.info(f"Got historical data for {symbol['tradingsymbol']}")
+            return result
+        except Exception as e:
+            logger.error(f"Error getting historical data: {e}")
+            return None
 
     @staticmethod
     def dataframe_to_json(df):
@@ -224,3 +274,8 @@ class KiteService:
         json_result = df.to_json(orient='records', date_format='iso')
 
         return json_result
+
+
+if __name__ == '__main__':
+    kite = KiteService()
+    kite.get_historical_data()

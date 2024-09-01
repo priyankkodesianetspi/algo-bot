@@ -1,21 +1,22 @@
 import functools
 import logging as logger
-import boto3
-from src.llm._types import Message, ModelParameters, Role, ChatFunction
+import os
+import typing as t
 
+import boto3
+import requests
 from mistralai.client import MistralClient
 from mistralai.models.chat_completion import ChatMessage
-from openai.lib.azure import AzureOpenAI
 from openai import AzureOpenAI
-from openai.types.chat import ChatCompletionMessageParam
-import requests
-from src.llm._types import Message, Parameters, Role, ChatFunction
-
 from openai import OpenAI
-import typing as t
-import os
+from openai.types.chat import ChatCompletionMessageParam
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+from src.llm._types import Message, Parameters, Role, ChatFunction
+from src.llm._types import ModelParameters
+
+# OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+OPENAI_API_KEY = "3abf01e78cce428f9cee24af6d36f863"
+PERPLEXITY_API_KEY = "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"
 
 def chat_openai(messages: t.List[Message], parameters: Parameters) -> Message:
     client = OpenAI(api_key=OPENAI_API_KEY)
@@ -25,7 +26,7 @@ def chat_openai(messages: t.List[Message], parameters: Parameters) -> Message:
 
     # Send messages to OpenAI API
     chat_completion = client.chat.completions.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4o-mini",
         messages=formatted_messages,
         temperature=parameters.temperature,
         max_tokens=parameters.max_tokens,
@@ -64,28 +65,28 @@ def chat_azure_openai(messages: t.List[Message], parameters: ModelParameters) ->
     )
 
 
-# def chat_perplexity_ai(messages: t.List[Message], parameters: ModelParameters) -> Message:
-#     url = "https://api.perplexity.ai/chat/completions"
-#     payload = {
-#         "model": parameters.model,
-#         "messages": [{"role": message.role.value, "content": message.content} for message in messages],
-#         "max_tokens": parameters.max_tokens,
-#         "temperature": parameters.temperature,
-#         "top_p": parameters.top_p,
-#     }
-#     headers = {
-#         "accept": "application/json",
-#         "content-type": "application/json",
-#         "authorization": f"Bearer {os.getenv("PERPLEXITY_API_KEY")}"
-#     }
-#
-#     response = requests.post(url, json=payload, headers=headers)
-#
-#     response_message = response.json()['choices'][0]['message']
-#
-#     return Message(
-#         role=Role(response_message['role']), content=str(response_message['content'])
-#     )
+def chat_perplexity_ai(messages: t.List[Message], parameters: ModelParameters) -> Message:
+    url = "https://api.perplexity.ai/chat/completions"
+    payload = {
+        "model": parameters.model,
+        "messages": [{"role": message.role.value, "content": message.content} for message in messages],
+        "max_tokens": parameters.max_tokens,
+        "temperature": parameters.temperature,
+        "top_p": parameters.top_p,
+    }
+    headers = {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "authorization": f"Bearer {PERPLEXITY_API_KEY}"
+    }
+
+    response = requests.post(url, json=payload, headers=headers)
+
+    response_message = response.json()['choices'][0]['message']
+
+    return Message(
+        role=Role(response_message['role']), content=str(response_message['content'])
+    )
 
 
 def chat_mistral(
@@ -207,6 +208,8 @@ Models: t.Dict[str, t.Tuple] = {
     # "gpt-3.5": (chat_openai, "gpt-3.5-turbo-instruct"),
     # "gpt-4": (chat_openai, "gpt-4"),
     "gpt-4-turbo": (chat_openai, "gpt-4-1106-preview"),
+    "perplexity_large": (chat_perplexity_ai, "llama-3.1-sonar-large-128k-online"),
+    "perplexity_huge": (chat_perplexity_ai, "llama-3.1-sonar-huge-128k-online"),
     # "llama-13b": (chat_together, "togethercomputer/llama-2-13b-chat"),
     # "llama-70b": (chat_together, "togethercomputer/llama-2-70b-chat"),
     # "vicuna-13b": (chat_together, "lmsys/vicuna-13b-v1.5"),

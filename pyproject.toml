@@ -1,0 +1,34 @@
+[tool.poetry]
+name = "algo-bot"
+version = "0.1.0"
+description = ""
+authors = ["Priyank Kodesia <56622329+priyankkodesianetspi@users.noreply.github.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9.6"
+pandas = "2.2.2"
+kiteconnect = "5.0.1"
+click = "8.1.7"
+flask = "3.0.3"
+itsdangerous = "2.2.0"
+jinja2 = "3.1.4"
+jmespath = "1.0.1"
+markupsafe = "2.1.5"
+python-dateutil = "2.9.0.post0"
+python-dotenv = ">=1.0.1,<1.1.0"
+logzero = ">=1.7.0,<1.8.0"
+pydantic = "2.7.4"
+mistralai = "0.1.8"
+requests = "2.32.3"
+uncurl = "0.0.11"
+jupyter = "^1.0.0"
+boto3 = "^1.35.0"
+openai = "^1.41.0"
+schedule = "^1.2.2"
+ta = "^0.11.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

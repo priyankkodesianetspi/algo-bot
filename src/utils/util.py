@@ -2,7 +2,6 @@ import datetime
 
 import pandas as pd
 import pytz
-from src.config import *
 
 
 def load_env_vars():
@@ -62,7 +61,7 @@ def getTotalPNL(positions):
     total_pnl = 0
     for position in positions:
         pnl = (position.sell_value - position.buy_value) + (
-                    position.quantity * position.last_price * position.multiplier)
+                position.quantity * position.last_price * position.multiplier)
         total_pnl += pnl
     return total_pnl
 
@@ -73,11 +72,15 @@ def get_access_token():
 
 
 def save_to_csv(df, instrument_key):
-    instrument_name = instrument_key.split('|')[1]
-    df = clean_and_normalize_data(df)
-    file_path = f"../data/{instrument_name}.csv"
+    # df = clean_and_normalize_data(df)
+    file_path = f"data/{instrument_key}.csv"
     df.to_csv(file_path, index=False)
     return file_path
+
+
+def read_from_csv(instrument_key):
+    file_path = f"data/{instrument_key}.csv"
+    return pd.read_csv(file_path)
 
 
 def clean_and_normalize_data(df):
