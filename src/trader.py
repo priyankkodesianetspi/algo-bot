@@ -120,24 +120,24 @@ class Trader:
                             # If we have a short position, close it
                             # {"TT":"BUY","TS":"SBIN", "PRICE": 123, "QTY": 1}
                             self.kite_service.place_order(
-                                {"TT": "BUY", "TS": ticker_symbol, "QTY": abs(position['quantity'])})
+                                {"TT": "BUY", "TS": ticker_symbol, "QTY": abs(position['quantity']), "PRICE": None})
                     elif action == 'Sell':
                         if position['quantity'] > 0:
                             # If we have a long position, close it
                             self.kite_service.place_order(
-                                {"TT": "SELL", "TS": ticker_symbol, "QTY": abs(position['quantity'])})
+                                {"TT": "SELL", "TS": ticker_symbol, "QTY": abs(position['quantity']), "PRICE": None})
                 else:
                     # We don't have an open position for this stock
                     if action == 'Buy':
-                        self.kite_service.place_order({"TT": "BUY", "TS": ticker_symbol})
+                        self.kite_service.place_order({"TT": "BUY", "TS": ticker_symbol, "PRICE": None, "QTY": None})
                     elif action == 'Sell':
-                        self.kite_service.place_order({"TT": "SELL", "TS": ticker_symbol})
+                        self.kite_service.place_order({"TT": "SELL", "TS": ticker_symbol, "PRICE": None, "QTY": None})
         else:
             # We don't have an open position for this stock
             if action == 'Buy':
-                self.kite_service.place_order({"TT": "BUY", "TS": ticker_symbol})
+                self.kite_service.place_order({"TT": "BUY", "TS": ticker_symbol, "PRICE": None, "QTY": None})
             elif action == 'Sell':
-                self.kite_service.place_order({"TT": "SELL", "TS": ticker_symbol})
+                self.kite_service.place_order({"TT": "SELL", "TS": ticker_symbol, "PRICE": None, "QTY": None})
 
     def get_news_rating(self, ticker_symbol):
         messages = [
