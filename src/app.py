@@ -2,8 +2,8 @@ import threading
 import time
 from datetime import datetime
 from flask import Flask
-from routes import init_routes
-from logger_config import setup_logging
+from src.routes import init_routes
+from src.logger_config import setup_logging
 import schedule
 import pytz
 

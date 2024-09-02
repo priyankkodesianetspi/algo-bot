@@ -1,9 +1,5 @@
 import os
 
-from dotenv import load_dotenv
-
-load_dotenv()
-
 KITE_API_SECRET = "g75rgyq5naf4tkj8lkv5w1i3s9pk70pn"
 KITE_API_KEY = "ye8rerpg2zxmibju"
 PASSPHRASE = "Ivaan@123"

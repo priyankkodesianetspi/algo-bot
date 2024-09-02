@@ -3,7 +3,7 @@ import logging as logger
 
 from flask import request, jsonify
 
-from config import LOGIN_URL
+from src.config import LOGIN_URL
 from src.kite.kite_service import KiteService
 from src.utils.util import load_env_vars
 
