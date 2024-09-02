@@ -130,6 +130,7 @@ class KiteService:
         try:
             return self.kite.place_order(tradingsymbol=symbol, exchange=self.kite.EXCHANGE_NSE,
                                          transaction_type=transaction_type, quantity=quantity, trigger_price=price,
+                                         price=price,
                                          variety=self.kite.VARIETY_REGULAR,
                                          order_type=order_type, product=PRODUCT_TYPE,
                                          validity=self.kite.VALIDITY_DAY)
@@ -143,7 +144,6 @@ class KiteService:
         symbol = data.get('TS')
         if not symbol:
             raise Exception("Symbol not provided")
-        logger.info(f"Margins {self.kite.margins()}")
         total_cash = self.kite.margins()['equity']['available']['live_balance']
         price = float(data['PRICE']) if data['PRICE'] else self._get_stock_ltp(symbol)
         target_price = _calculate_target_price(price)
@@ -151,7 +151,7 @@ class KiteService:
         try:
             quantity = int(data['QTY']) if data.get('QTY') else _get_quantity(total_cash, price)
             if quantity < 1:
-                raise Exception("Quantity cannot be 0")
+                return
 
             primary_transaction_type = 'SELL' if data['TT'] == 'SELL' else 'SELL'
             primary_order_type = ORDER_TYPE
@@ -160,7 +160,7 @@ class KiteService:
             target_order_type = 'LIMIT'
 
             stop_loss_transaction_type = 'BUY' if primary_transaction_type == 'SELL' else 'SELL'
-            stop_loss_order_type = 'SL-M'
+            stop_loss_order_type = 'SL'
 
             logger.info(f"Placing order : Cash Balance {total_cash}, Stock {symbol}, "
                         f"Last Traded Price: {price}, Quantity: {quantity}")
@@ -180,7 +180,7 @@ class KiteService:
             logger.info(f"Order placed successfully: {primary_order_id}, {target_order_id}, {sl_order_id}")
         except Exception as e:
             logger.error(f"Error placing order: {e}")
-            write_missed_order_data_to_file(data, price, target_price, stop_loss_price)
+            write_missed_order_data_to_file(data, price, stop_loss_price, target_price)
 
     def _get_stock_ltp(self, symbol):
         try:
@@ -277,5 +277,7 @@ class KiteService:
 
 
 if __name__ == '__main__':
-    kite = KiteService()
-    kite.get_historical_data()
+
+    tp = _calculate_target_price(1000)
+    sl = _calculate_stop_loss_price(1000)
+    print(tp, sl)

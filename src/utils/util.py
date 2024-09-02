@@ -22,7 +22,7 @@ def write_order_data_to_file(key, orders):
         'order_type': order['order_type']
     } for order in orders]
     df = pd.concat([df, pd.DataFrame(new_rows)], ignore_index=True)
-    df.to_csv('trades.csv', index=False, header=True)
+    df.to_csv('../trades.csv', index=False, header=True)
 
 
 def write_missed_order_data_to_file(data, price, stop_loss_price, target_price):
@@ -36,7 +36,7 @@ def write_missed_order_data_to_file(data, price, stop_loss_price, target_price):
         'target_price': target_price,
     }]
     df = pd.concat([df, pd.DataFrame(new_rows)], ignore_index=True)
-    df.to_csv('missed_trades.csv', index=False, header=True)
+    df.to_csv('../missed_trades.csv', index=False, header=True)
 
 
 def isTradeTimeAllowed():
