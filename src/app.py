@@ -10,15 +10,14 @@ import pytz
 from src.data.selected_nifty_companies import selected_companies
 from src.trader import Trader
 
-# Assuming generate_recommendation is imported from another service
-# from some_service import Scoping
-
 # Setup logging
 setup_logging()
 
 app = Flask(__name__)
 init_routes(app)
 
+# Define the specific times when the function should run
+run_minutes = [16, 31, 46, 1]
 
 def my_function():
     trader = Trader()
@@ -49,16 +48,16 @@ def run_scheduled_job():
 
     # Define the start and end times
     start_time = now.replace(hour=9, minute=15, second=0, microsecond=0)
-    end_time = now.replace(hour=15, minute=15, second=0, microsecond=0)
+    end_time = now.replace(hour=15, minute=16, second=0, microsecond=0)
 
-    # Check if the current time is within the range
-    if start_time <= now <= end_time:
+    # Check if the current time is within the range and at the specified minutes
+    if start_time <= now <= end_time and now.minute in run_minutes:
         my_function()
 
 
 def schedule_tasks():
-    # Schedule the task to run every 15 minutes
-    schedule.every(15).minutes.do(run_scheduled_job)
+    # Schedule the task to check every minute
+    schedule.every().minute.do(run_scheduled_job)
 
     while True:
         schedule.run_pending()
